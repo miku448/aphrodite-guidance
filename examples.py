@@ -16,11 +16,12 @@ tokenizer.special_tokens_map.values()
 llm = AphroditeOpenAIClient(
     model_name,
     api_base="http://localhost:2242/v1", # Aphrodite endpoint
-    api_key='',
+    api_key="sk-EMPTY", # Use an api key defined in aphrodite's --api-keys argument
     tokenizer=tokenizer,
     chat_mode=False,
     rest_call=False,
     temperature=0.7,
+    caching=False
 )
 
 # Use aphrodite client for guidance
