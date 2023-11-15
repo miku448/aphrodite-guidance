@@ -4,7 +4,7 @@ from aphrodite_client.openai import AphroditeOpenAIClient
 from aphrodite_client.utils import print_example
 
 # Set up model to use
-model_name = "../oobabooga/models/MLewd-ReMM-L2-Chat-20B-GPTQ"
+model_name = "mistralai/Mistral-7B-v0.1"
 
 # Create tokenizer for model
 tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
