@@ -4,7 +4,7 @@ from aphrodite_client.openai import AphroditeOpenAIClient
 from aphrodite_client.utils import print_example
 
 # Set up model to use
-model_name = "mistralai/Mistral-7B-v0.1"
+model_name = "../oobabooga/models/MLewd-ReMM-L2-Chat-20B-GPTQ"
 
 # Create tokenizer for model
 tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
@@ -27,32 +27,43 @@ llm = AphroditeOpenAIClient(
 # Use aphrodite client for guidance
 guidance.llm = llm
 
-# EXAMPLE 1
+# EXAMPLE 1: Simple generation (2-shot)
+prompt = guidance('''Common sense question and answer, with short answers
+Question: What is your favorite food?
+Answer: Sushi.
+Question: What is your favorite color?
+Answer: Blue.
+Question: What is your favorite animal?
+Answer:{{gen "response" stop="."}}''') ## TODO: It we put an space after "Answer:" it doesn't work. Need to fix this.
+result = prompt()
+print_example('Example 1', prompt.text, result.variables())
+
+# EXAMPLE 2
 prompt = guidance('''I will show you an email and a response, and you will tell me if it's offensive.
 Email: {{email}}.
 Response: I also don't{{gen "response" stop="."}}
 Is the response above offensive in any way? Please answer with a single word, either "Yes" or "No".
 Answer:{{#select "answer" logprobs='logprobs'}} Yes{{or}} No{{/select}}''')
 result = prompt(email='I hate tacos')
-print_example('Example 1', prompt.text, result.variables())
-
-# EXAMPLE 2
-prompt = guidance("""Common sense question and answer
-Question: What is the besto waifu in domekano?
-Answer: {{#select "waifu"}} Hina{{or}} Rui{{/select}}""")
-result = prompt()
 print_example('Example 2', prompt.text, result.variables())
 
 # EXAMPLE 3
+prompt = guidance("""Common sense question and answer
+Question: What is the besto waifu in domekano?
+Answer: {{#select "waifu"}} Hina{{or}} Rui{{or}} Momo{{/select}}""")
+result = prompt()
+print_example('Example 3', prompt.text, result.variables())
+
+# EXAMPLE 4
 # TODO: NOT WORKING YET. Remove whitepace on select options
 prompt = guidance("""RPG Game Character specification
   {
     "name": "{{name}}",
     "job": "{{gen 'job' stop='"'}}",
-    "armor": "{{#select "armor"}} leather{{or}} plate{{/select}}",
+    "armor": "{{#select 'armor'}} leather{{or}} plate{{/select}}",
+    "weapon": "{{select 'weapon' options=valid_weapons}}"
   }
 """)
 # TODO: patterns like "{{select 'weapon' options=valid_weapons}}" do not work, need further debugging
-# result = prompt(name="Rudeus", valid_weapons=["sword", "axe", "mace", "spear", "bow", "crossbow"])
-result = prompt(name="Rudeus")
-print_example('Example 3', prompt.text, result.variables())
+result = prompt(name="Rudeus", valid_weapons=[" sword", " axe", " mace", " spear", " bow", " crossbow"])
+print_example('Example 4', prompt.text, result.variables())
