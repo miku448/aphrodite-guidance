@@ -103,3 +103,6 @@ class AphroditeOpenAIClient(guidance.llms.OpenAI):
 
     def token_to_id(self, token):
         return self.encode(token)[-1]
+    
+    def encode(self, string):
+      return self._tokenizer.encode(string)
