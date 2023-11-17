@@ -20,7 +20,7 @@ llm = AphroditeOpenAIClient(
     tokenizer=tokenizer,
     chat_mode=False,
     rest_call=False,
-    temperature=0.7,
+    temperature=0.9,
     caching=False
 )
 
@@ -30,11 +30,11 @@ guidance.llm = llm
 # EXAMPLE 1: Simple generation (2-shot)
 prompt = guidance('''Common sense question and answer, with short answers
 Question: What is your favorite food?
-Answer: Sushi.
+Answer: "Sushi."
 Question: What is your favorite color?
-Answer: Blue.
+Answer: "Blue."
 Question: What is your favorite animal?
-Answer:{{gen "response" stop="."}}''') ## TODO: It we put an space after "Answer:" it doesn't work. Need to fix this.
+Answer: "{{gen "response" stop='"'}}"''') ## TODO: It we put an space after "Answer:" it doesn't work. Need to fix this.
 result = prompt()
 print_example('Example 1', prompt.text, result.variables())
 
@@ -55,15 +55,13 @@ result = prompt()
 print_example('Example 3', prompt.text, result.variables())
 
 # EXAMPLE 4
-# TODO: NOT WORKING YET. Remove whitepace on select options
 prompt = guidance("""RPG Game Character specification
   {
     "name": "{{name}}",
-    "job": "{{gen 'job' stop='"'}}",
-    "armor": "{{#select 'armor'}} leather{{or}} plate{{/select}}",
+    "job": "{{gen 'job' stop='",'}}",
+    "armor": "{{#select 'armor'}}silver{{or}}leather{{/select}}",
     "weapon": "{{select 'weapon' options=valid_weapons}}"
   }
 """)
-# TODO: patterns like "{{select 'weapon' options=valid_weapons}}" do not work, need further debugging
-result = prompt(name="Rudeus", valid_weapons=[" sword", " axe", " mace", " spear", " bow", " crossbow"])
+result = prompt(name="Rudeus the silver", valid_weapons=["axe", "mace", "spear", "sword", "bow", "crossbow"])
 print_example('Example 4', prompt.text, result.variables())

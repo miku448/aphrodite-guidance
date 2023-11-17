@@ -1,4 +1,4 @@
-guidance==0.0.64
+guidance @ git+https://github.com/miku448/guidance@0.0.65-patch.1
 transformers==4.35.0
 openai==0.27.8
 colorama

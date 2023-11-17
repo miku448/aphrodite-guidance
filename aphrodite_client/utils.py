@@ -35,40 +35,30 @@ def draw_ascii_box(text, width=80):
 
 def print_example(title, prompt, variables):
   # Regex pattern to match select structures like {{#select "key" ...}}...{{/select}}
-  # select_pattern = r'\{\{#select\s+(?:\"(.*?)\"|\b(\w+)\b)(.*?)\}\}(.*?)\{\{\/select\}\}'
-  select_pattern = r'\{\{#select\s+(?:"(.*?)"|\'(.*?)\'|\b(\w+)\b)(.*?)\}\}(.*?)\{\{\/select\}\}'
+  select_pattern_with_content = r'\{\{#select\s+(?:"(.*?)"|\'(.*?)\'|\b(\w+)\b).*?\}\}(.*?)\{\{\/select\}\}'
+  select_pattern_without_content = r'\{\{select\s+(?:"(.*?)"|\'(.*?)\'|\b(\w+)\b).*?\}\}'
+  # Regex pattern to find {{key}} in the prompt
+  simple_pattern = r'\{\{(.*?)\}\}'
+  # Regex pattern to find {{key}} or {{gen "key" ...}} in the prompt
+  gen_pattern = r'\{\{\s*(?:gen\s+)?(?:"(.*?)"|\'(.*?)\')\s*.*?\}\}'
 
   # Replace select structures first
-  def replace_select(match):
+  def replace_match(match):
     key = match.group(1) or match.group(2) or match.group(3)
     return f"{Back.GREEN}{variables.get(key, '')}{Back.BLACK}"
 
-  # Regex pattern to find {{key}} in the prompt
-  simple_pattern = r'\{\{(.*?)\}\}'
-
-  def replace_simple(match):
-    key = match.group(1).split()[0]  # Get the key from the match
-    key = key.replace('"', '')  # Remove any quotes around the key
-    return f"{Back.GREEN}{variables.get(key, '')}{Back.BLACK}"
-
-  # Regex pattern to find {{key}} or {{gen "key" ...}} in the prompt
-  # gen_pattern = r'\{\{\s*(?:gen\s+)?\"(.*?)\"\s*.*?\}\}'
-  gen_pattern = r'\{\{\s*(?:gen\s+)?(?:"(.*?)"|\'(.*?)\')\s*.*?\}\}'
-
-  def replace_gen(match):
-    key = match.group(1) or match.group(2)
-    return f"{Back.GREEN}{variables.get(key, match.group(0))}{Back.BLACK}"
-
-  formatted_completion = re.sub(select_pattern, replace_select, prompt)
-  formatted_completion = re.sub(gen_pattern, replace_gen, formatted_completion)
-  formatted_completion = re.sub(simple_pattern, replace_simple, formatted_completion)
+  formatted_completion = re.sub(select_pattern_without_content, replace_match, prompt)
+  formatted_completion = re.sub(select_pattern_with_content, replace_match, formatted_completion)
+  formatted_completion = re.sub(gen_pattern, replace_match, formatted_completion)
+  formatted_completion = re.sub(simple_pattern, replace_match, formatted_completion)
 
   # Function to add color to matched patterns
   def add_color_simple(match):
     return f"{Back.CYAN}{match.group(0)}{Back.BLACK}"
 
   # Apply color formatting to each match in the prompt
-  formatted_prompt = re.sub(select_pattern, add_color_simple, f'{Back.BLACK}{prompt}')
+  formatted_prompt = re.sub(select_pattern_without_content, add_color_simple, f'{Back.BLACK}{prompt}')
+  formatted_prompt = re.sub(select_pattern_with_content, add_color_simple, formatted_prompt)
   formatted_prompt = re.sub(gen_pattern, add_color_simple, formatted_prompt)
   formatted_prompt = re.sub(simple_pattern, add_color_simple, formatted_prompt)
 
